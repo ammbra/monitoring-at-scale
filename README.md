@@ -19,9 +19,10 @@ In this repo you will also find 2 Grafana Dashboards:
 * [Sample-Jaeger-tracing-dashboard.json](Sample-Jaeger-tracing-dashboard.json) is capturing generic metrics for different application installations ($container variable).
   
     * __Span count distribution__ panel is based on the following query:
-        ```
+    
+        `
       sum(increase(span_seconds_count{container="$container"}[1m])) without (pod_name,instance,job,pod_template_hash,namespace,transaction,error)
-        ```
+        `
 
     * __Average span duration over time__ panel is based on the following query:
     
@@ -30,22 +31,26 @@ In this repo you will also find 2 Grafana Dashboards:
       `
 
     * __Service error ratio__ panel is based on the following query:
-      ```
+    
+      `
       sum(increase(span_seconds_count{error="true",span_kind="server",container="$container"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind) / sum(increase(span_seconds_count{span_kind="server",container="$container"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind)
-      ```
+      `
 * [Order_tracing.json](Order_tracing.json) is capturing metrics that are relevant to order functionality.
 
     * __Order service error ratio__ panel is following the errors reported for Order microservice and is based on the following query:
-      ```
+    
+      `
       sum(increase(span_seconds_count{error="true",span_kind="server",container="order"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind) / sum(increase(span_seconds_count{span_kind="server",container="order"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind)  
-      ```
+      `
 
     * __Average event rate over time__ panel contains information about interactions with Event endpoint over time and is based on the following query:
-      ```
+    
+      `
       avg(rate(event_counter_total[5m]))without (instance,namespace)
-      ```
+      `
     * __Refund ratio__ panel contains information about refunds and is based on the following query:
-      ```
+    
+      `
       sum(increase(span_seconds_count{container="order",operation!="GET",operation="refund"}[1m])) without (pod_name,instance,job,namespace,pod_template_hash)
-      ```      
+      `      
                   
