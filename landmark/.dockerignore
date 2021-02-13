@@ -1,0 +1,6 @@
+*
+!target/*-runner
+!target/*-runner.jar
+!target/lib/*
+!target/classes/jmx-exporter-config.yml
+!target/classes/jmx_prometheus_javaagent-0.10.jar

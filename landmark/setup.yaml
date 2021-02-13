@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landmark
+  labels:
+    app: landmark
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: landmark
+  template:
+    metadata:
+      labels:
+        app: landmark
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: landmark
+          image: ammbra/landmark:0.0.35
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - name: prometheus-jmx
+              containerPort: 9099
+          env:
+          - name: JAEGER_SERVICE_NAME
+            value: landmark
+          - name: JAEGER_AGENT_HOST
+            value: jaeger-agent
+          - name: JAEGER_SAMPLER_TYPE
+            value: const
+          - name: JAEGER_SAMPLER_PARAM
+            value: "1"
+          - name: JAEGER_REPORTER_LOG_SPANS
+            value: "true"
+          - name: JAEGER_TAGS
+            value: "version=${VERSION}"
+          - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
+            value: "/metrics"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landmark-service
+  labels:
+    app: landmark
+spec:
+  type: LoadBalancer
+  selector:
+    app: landmark
+  ports:
+    - protocol: TCP
+      name: http-traffic
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: landmark-service-monitor
+spec:
+  selector:
+    matchLabels:
+      app: landmark
+  endpoints:
+    - port: http-traffic
+      path: "/metrics"

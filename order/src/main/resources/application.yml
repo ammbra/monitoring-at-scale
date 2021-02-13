@@ -1,0 +1,27 @@
+spring:
+    application:
+        name: order
+management:
+    endpoint:
+        prometheus:
+            enabled: true
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        export:
+          prometheus:
+              enabled: true
+        tags:
+            application: ${spring.application.name}
+opentracing:
+    spring:
+        cloud:
+            log:
+                enabled: true
+itinerary: ${ITINERARY_URL:http://localhost:8080}
+visitor: ${VISITOR_URL:http://localhost:8080}
+event: ${EVENT_URL:http://localhost:8080}

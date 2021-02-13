@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visitor
+  labels:
+    app: visitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: visitor
+  template:
+    metadata:
+      labels:
+        app: visitor
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: visitor
+          image: ammbra/visitor:0.0.5
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - name: prometheus-jmx
+              containerPort: 9099
+          env:
+          - name: JAEGER_SERVICE_NAME
+            value: visitor
+          - name: JAEGER_AGENT_HOST
+            value: jaeger-agent
+          - name: JAEGER_SAMPLER_TYPE
+            value: const
+          - name: JAEGER_SAMPLER_PARAM
+            value: "1"
+          - name: JAEGER_REPORTER_LOG_SPANS
+            value: "true"
+          - name: JAEGER_TAGS
+            value: "version=${VERSION}"
+          - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
+            value: "/metrics"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: visitor-service
+  labels:
+    app: visitor
+spec:
+  type: LoadBalancer
+  selector:
+    app: visitor
+  ports:
+    - protocol: TCP
+      name: http-traffic
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: visitor-service-monitor
+spec:
+  selector:
+    matchLabels:
+      app: visitor
+  endpoints:
+    - port: http-traffic
+      path: "/actuator/prometheus"

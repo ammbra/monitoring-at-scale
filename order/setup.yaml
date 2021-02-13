@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  labels:
+    app: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: order
+          image: ammbra/order:0.0.46
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - name: prometheus-jmx
+              containerPort: 9099
+          env:
+          - name: JAEGER_SERVICE_NAME
+            value: order
+          - name: JAEGER_AGENT_HOST
+            value: jaeger-agent
+          - name: JAEGER_SAMPLER_TYPE
+            value: const
+          - name: JAEGER_SAMPLER_PARAM
+            value: "1"
+          - name: JAEGER_REPORTER_LOG_SPANS
+            value: "true"
+          - name: JAEGER_TAGS
+            value: "version=${VERSION}"
+          - name: ITINERARY_URL
+            value: "http://itinerary-service:8080"
+          - name: EVENT_URL
+            value: "http://event-service:8080/event"
+          - name: VISITOR_URL
+            value: "http://visitor-service:8080"
+          - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
+            value: "/metrics"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  labels:
+    app: order
+spec:
+  type: LoadBalancer
+  selector:
+    app: order
+  ports:
+    - protocol: TCP
+      name: http-traffic
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: order-service-monitor
+spec:
+  selector:
+    matchLabels:
+      app: order
+  endpoints:
+    - port: http-traffic
+      path: "/actuator/prometheus"

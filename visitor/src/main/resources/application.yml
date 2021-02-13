@@ -1,0 +1,19 @@
+spring:
+    application:
+        name: visitor
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        tags:
+            application: ${spring.application.name}
+opentracing:
+    spring:
+        cloud:
+            log:
+                enabled: true
