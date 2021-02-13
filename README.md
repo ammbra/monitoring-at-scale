@@ -35,7 +35,7 @@ In this repo you will also find 2 Grafana Dashboards:
       `
       sum(increase(span_seconds_count{error="true",span_kind="server",container="$container"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind) / sum(increase(span_seconds_count{span_kind="server",container="$container"}[1m])) without (pod,instance,job,namespace,endpoint,transaction,error,operation,span_kind)
       `
-* [Order_tracing.json](Order_tracing.json) is capturing metrics that are relevant to order functionality.
+* [Order_tracing.json](Order-tracing.json) is capturing metrics that are relevant to order functionality.
 
     * __Order service error ratio__ panel is following the errors reported for Order microservice and is based on the following query:
     
