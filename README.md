@@ -24,9 +24,9 @@ In this repo you will also find 2 Grafana Dashboards:
         ```
 
     * __Average span duration over time__ panel is based on the following query:
-      ```
+      `
       avg(rate(span_seconds_sum{container="$container"}[1m])) without (pod_name,instance,job,namespace,pod_template_hash,transaction,error)
-      ```
+      `
 
     * __Service error ratio__ panel is based on the following query:
       ```
